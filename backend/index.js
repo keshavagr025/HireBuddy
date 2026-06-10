@@ -161,6 +161,11 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/jobs', jobs);
 app.use('/api/ai', ChatRoute);
 
+// 🏠 Welcome route
+app.get('/', (req, res) => {
+  res.json({ status: 'OK', message: 'Welcome to the HireBuddy API server!' });
+});
+
 // 🏥 Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Resume Analytics API is running' });
