@@ -1,156 +1,142 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Briefcase,
   LayoutDashboard,
   FileText,
   UserCheck,
   Calendar,
   Target,
-  Bell,
-  LogOut,
-  Award,
-  Menu,
-  X,
   BarChart3,
   Users,
+  Menu,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
-import UserProfile from './UserProfile';
-
+import UserProfile from "./UserProfile";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const { pathname } = useLocation();
 
   const navItems = [
-    { to: "/", label: "Dashboard", icon: <LayoutDashboard size={15} /> },
-    { to: "/applications", label: "Applications", icon: <FileText size={15} /> },
-    { to: "/career-roadmap", label: "Roadmap", icon: <UserCheck size={15} /> },
-    { to: "/salary-insights", label: "SalaryInsights", icon: <Target size={15} /> },
-    { to: "/mock-interviews", label: "Mock Interviews", icon: <Users size={15} /> },
-    { to: "/analytics", label: "Analytics", icon: <BarChart3 size={15} /> },
-  
+    { to: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+    { to: "/applications", label: "Job Tracker", icon: <FileText size={18} />, badge: "Hot" },
+    { to: "/resumes", label: "Resume Tracker", icon: <Calendar size={18} /> },
+    { to: "/career-roadmap", label: "AI Roadmap", icon: <UserCheck size={18} /> },
+    { to: "/salary-insights", label: "Salary Insights", icon: <Target size={18} /> },
+    { to: "/mock-interviews", label: "AI Interviews", icon: <Users size={18} />, badge: "AI" },
+    { to: "/analytics", label: "Resume Analytics", icon: <BarChart3 size={18} /> },
   ];
 
   return (
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+        <div
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-     <aside
-  className={`fixed top-0 left-0 h-full overflow-y-auto transition-all duration-500 ease-in-out z-40
-    ${isOpen ? "w-80 px-6" : "w-20 px-3"}
-    bg-gradient-to-b from-purple-50/95 via-white/90 to-purple-50/80
-    backdrop-blur-2xl border-r border-purple-200/50 
-    shadow-[0_20px_70px_rgba(147,51,234,0.15)]`}
->
-<UserProfile isOpen={isOpen} />
-        {/* Top Logo Section with Glassmorphism */}
-        <div className="flex items-center justify-between h-20 relative">
+      <aside
+        className={`fixed top-0 left-0 h-full overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out z-40
+          ${isOpen ? "w-64" : "w-20"}
+          bg-slate-900 text-slate-100 border-r border-slate-800/60
+          shadow-xl flex flex-col`}
+      >
+        {/* Top Header Section */}
+        <div className="flex items-center justify-between px-4 h-16 border-b border-slate-800/60 shrink-0">
+          {isOpen ? (
+            <div className="flex items-center space-x-2 animate-fade-in-up">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
+                <Sparkles size={16} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-sm font-bold bg-gradient-to-r from-indigo-200 to-violet-100 bg-clip-text text-transparent">
+                  ReadyBoss
+                </h1>
+                <p className="text-[10px] text-slate-500 font-medium">Career Assistant</p>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full flex justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
+                <Sparkles size={16} className="text-white" />
+              </div>
+            </div>
+          )}
+
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2.5 rounded-xl bg-gradient-to-r from-purple-400 via-purple-500 to-indigo-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+            className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all active:scale-95 shrink-0"
           >
-            <div className="group-hover:rotate-180 transition-transform duration-300">
-              {isOpen ? <X size={18} /> : <Menu size={15} />}
-            </div>
+            {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
         </div>
 
-        {/* Navigation Items with Enhanced Styling */}
-        <div className="flex flex-col overflow-y-auto mt-6 space-y-3">
-          <nav className="flex-1 space-y-3">
+        {/* User Profile Container */}
+        <div className="px-3 py-4 border-b border-slate-800/40 shrink-0">
+          <UserProfile isOpen={isOpen} />
+        </div>
+
+        {/* Navigation Items */}
+        <div className="flex-1 px-3 py-4 space-y-1">
+          <nav className="space-y-1">
             {navItems.map((item, index) => {
-              const isActive = pathname === item.to;
+              // Exact match or active subpaths
+              const isActive = pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to));
               return (
                 <Link
                   key={index}
                   to={item.to}
-                  className={`group relative flex items-center gap-4 p-4 rounded-2xl text-sm font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden
-                    ${
-                      isActive
-                        ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white shadow-2xl border border-purple-400/30"
-                        : "text-purple-600/70 hover:text-purple-700 hover:bg-purple-50/60 backdrop-blur-sm"
+                  className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 overflow-hidden
+                    ${isActive
+                      ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
                     }`}
                 >
-                  {/* Active indicator */}
-                  {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 animate-pulse" />
-                  )}
-                  
-                  {/* Icon container */}
-                  <div className={`relative p-2.5 rounded-xl shadow-sm transition-all duration-300 z-10
-                    ${
-                      isActive
-                        ? "bg-white/20 backdrop-blur-sm shadow-lg"
-                        : "bg-white/80 group-hover:bg-white group-hover:shadow-md"
-                    }`}
-                  >
-                    <div className={`transition-colors duration-300 ${
-                      isActive ? "text-white" : "text-purple-600"
+                  {/* Icon */}
+                  <div className={`shrink-0 transition-colors duration-200 ${isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200"
                     }`}>
-                      {item.icon}
-                    </div>
+                    {item.icon}
                   </div>
 
-                  {/* Label and Badge */}
+                  {/* Label & Badge */}
                   {isOpen && (
-                    <div className="flex items-center justify-between flex-1 z-10">
-                      <span className={`font-semibold transition-colors duration-300 ${
-                        isActive ? "text-white" : "text-purple-700"
-                      }`}>
-                        {item.label}
-                      </span>
+                    <div className="flex items-center justify-between flex-1 truncate animate-fade-in-up">
+                      <span>{item.label}</span>
                       {item.badge && (
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 ${
-                          isActive
-                            ? "bg-white/25 text-white backdrop-blur-sm"
-                            : "bg-purple-100 text-purple-600 group-hover:bg-purple-200"
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase leading-none
+                          ${isActive
+                            ? "bg-white/20 text-white"
+                            : "bg-indigo-950 text-indigo-400 border border-indigo-900"
+                          }`}
+                        >
                           {item.badge}
                         </span>
                       )}
                     </div>
                   )}
 
-                  {/* Hover effect overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+                  {/* Tooltip for Collapsed Sidebar */}
+                  {!isOpen && (
+                    <div className="absolute left-16 scale-0 group-hover:scale-100 bg-slate-800 text-slate-100 text-[10px] font-bold px-2 py-1 rounded shadow-lg transition-all duration-150 origin-left z-50 pointer-events-none whitespace-nowrap border border-slate-700">
+                      {item.label}
+                    </div>
+                  )}
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* Bottom Section - Resume Score & Logout */}
-        <div className="absolute bottom-4 left-0 w-full px-3">
-          {/* Logout Button */}
-         
-        </div>
+        {/* Footer Area */}
+        {isOpen && (
+          <div className="p-4 border-t border-slate-800/40 text-center shrink-0">
+            <p className="text-[10px] text-slate-600 font-medium">v1.2.0 • Pro Active</p>
+          </div>
+        )}
       </aside>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateX(-10px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out;
-        }
-        
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
-        }
-      `}</style>
     </>
   );
 };
