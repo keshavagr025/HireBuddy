@@ -1,5 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 import cors from 'cors';
 import http from 'http';
 import path from 'path';
@@ -8,13 +11,14 @@ import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import Message from './models/Message.js';
+import JobRole from './models/JobRole.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 
-const corsOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',') 
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',')
   : ['http://localhost:5173', 'http://localhost:5174'];
 
 const server = http.createServer(app);
@@ -36,12 +40,96 @@ mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ MongoDB Connected'))
-.catch(err => console.error('❌ MongoDB Error:', err));
+  .then(async () => {
+    console.log('✅ MongoDB Connected');
+    await seedJobRoles();
+  })
+  .catch(err => console.error('❌ MongoDB Error:', err));
+
+async function seedJobRoles() {
+  try {
+    const count = await JobRole.countDocuments();
+    if (count === 0) {
+      console.log('🌱 Seeding default job roles...');
+      const defaultRoles = [
+        {
+          title: "Frontend Engineer",
+          description: "Develop and optimize responsive client-side web components.",
+          industry: "Tech",
+          level: "mid",
+          requiredSkills: [
+            { name: "React", weight: 1.5, category: "technical" },
+            { name: "JavaScript", weight: 1.2, category: "technical" },
+            { name: "HTML", weight: 1.0, category: "technical" },
+            { name: "CSS", weight: 1.0, category: "technical" },
+            { name: "TypeScript", weight: 1.2, category: "technical" },
+            { name: "Git", weight: 1.0, category: "tool" }
+          ],
+          keywords: [
+            { term: "React", weight: 1.5, synonyms: ["ReactJS", "React.js"] },
+            { term: "JavaScript", weight: 1.2, synonyms: ["JS", "ES6"] },
+            { term: "CSS", weight: 1.0, synonyms: ["Tailwind", "Bootstrap", "Sass"] },
+            { term: "TypeScript", weight: 1.2, synonyms: ["TS"] },
+            { term: "Frontend", weight: 1.0, synonyms: ["Client-side", "UI", "UX"] }
+          ],
+          minimumScore: 60
+        },
+        {
+          title: "Backend Engineer",
+          description: "Design scalable API routes, schemas, and database query triggers.",
+          industry: "Tech",
+          level: "mid",
+          requiredSkills: [
+            { name: "Node.js", weight: 1.5, category: "technical" },
+            { name: "Express", weight: 1.2, category: "technical" },
+            { name: "MongoDB", weight: 1.5, category: "technical" },
+            { name: "SQL", weight: 1.2, category: "technical" },
+            { name: "REST API", weight: 1.0, category: "technical" },
+            { name: "Git", weight: 1.0, category: "tool" }
+          ],
+          keywords: [
+            { term: "Node.js", weight: 1.5, synonyms: ["Node", "NodeJS"] },
+            { term: "Express", weight: 1.2, synonyms: ["Express.js", "ExpressJS"] },
+            { term: "MongoDB", weight: 1.5, synonyms: ["Mongo", "Mongoose"] },
+            { term: "SQL", weight: 1.2, synonyms: ["MySQL", "PostgreSQL"] },
+            { term: "API", weight: 1.0, synonyms: ["REST", "RESTful", "GraphQL"] }
+          ],
+          minimumScore: 60
+        },
+        {
+          title: "Full Stack Engineer",
+          description: "Lead end-to-end component design and cloud devops integrations.",
+          industry: "Tech",
+          level: "mid",
+          requiredSkills: [
+            { name: "React", weight: 1.5, category: "technical" },
+            { name: "Node.js", weight: 1.5, category: "technical" },
+            { name: "JavaScript", weight: 1.2, category: "technical" },
+            { name: "MongoDB", weight: 1.2, category: "technical" },
+            { name: "Git", weight: 1.0, category: "tool" },
+            { name: "Docker", weight: 1.0, category: "tool" }
+          ],
+          keywords: [
+            { term: "React", weight: 1.5, synonyms: ["ReactJS", "React.js"] },
+            { term: "Node.js", weight: 1.5, synonyms: ["Node", "NodeJS"] },
+            { term: "Full Stack", weight: 1.2, synonyms: ["MERN", "MEAN"] },
+            { term: "Docker", weight: 1.0, synonyms: ["Containerization", "Containers"] },
+            { term: "Cloud", weight: 1.0, synonyms: ["AWS", "Azure", "GCP"] }
+          ],
+          minimumScore: 60
+        }
+      ];
+      await JobRole.insertMany(defaultRoles);
+      console.log('🌱 Seeded default job roles into database.');
+    }
+  } catch (err) {
+    console.error('❌ Seeding error:', err);
+  }
+}
 
 // 📦 Middlewares
 app.use(cors({
-  origin:  corsOrigins,
+  origin: corsOrigins,
   credentials: true,
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -56,7 +144,7 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 import resumeRoutes from './routes/resumeRoutes.js';
 import jobRoleRoutes from './routes/jobRoleRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
-import salaryRoutes from './routes/salaryRoutes.js'; 
+import salaryRoutes from './routes/salaryRoutes.js';
 import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
 import learningRoutes from './routes/learningRoutes.js';
 import jobs from './routes/jobs.js';
@@ -136,17 +224,17 @@ io.on('connection', (socket) => {
   console.log('User connected');
 
   socket.on('user_message', async (userMessage) => {
-  
+
     const aiReply = await generateAIReply(userMessage);
     console.log('📩 Received from user:', userMessage);
-  await Message.create({
-    user: socket.id,
-    prompt: userMessage,
-    aiReply,
-  });
+    await Message.create({
+      user: socket.id,
+      prompt: userMessage,
+      aiReply,
+    });
 
-  socket.emit('bot reply', aiReply);
-});
+    socket.emit('bot reply', aiReply);
+  });
 
   socket.on('disconnect', () => {
     console.log('User disconnected');

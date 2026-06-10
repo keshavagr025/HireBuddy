@@ -235,7 +235,7 @@ Provide exactly 5 suggestions, each numbered 1-5, with specific actionable advic
 
   const requestFn = async () => {
     return await cohere.chat({
-      model: "command-light", // Using lighter model for cost efficiency
+      model: "command", // Using standard command model
       message: prompt,
       temperature: 0.7,
       maxTokens: 400,
@@ -302,7 +302,7 @@ Limit to 15 most relevant skills.`;
 
   const requestFn = async () => {
     return await cohere.chat({
-      model: "command-light",
+      model: "command",
       message: prompt,
       temperature: 0.1,
       maxTokens: 200,
@@ -362,7 +362,7 @@ Focus on ATS optimization, keyword usage, formatting, and content quality.`;
 
   const requestFn = async () => {
     return await cohere.chat({
-      model: "command-light",
+      model: "command",
       message: prompt,
       temperature: 0.3,
       maxTokens: 300,
@@ -424,7 +424,7 @@ export async function checkCohereHealth() {
   try {
     const response = await safeCohereCall(async () => {
       return await cohere.chat({
-        model: "command-light",
+        model: "command",
         message: "Hello, are you working?",
         maxTokens: 10
       });
@@ -433,7 +433,7 @@ export async function checkCohereHealth() {
     return { 
       status: 'healthy', 
       message: 'Cohere API is accessible',
-      model: 'command-light'
+      model: 'command'
     };
   } catch (error) {
     return { 
@@ -459,7 +459,7 @@ Return only a JSON array of keywords: ["keyword1", "keyword2", ...]`;
 
   const requestFn = async () => {
     return await cohere.chat({
-      model: "command-light",
+      model: "command",
       message: prompt,
       temperature: 0.2,
       maxTokens: 150

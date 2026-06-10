@@ -1,7 +1,8 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import pdf from 'pdf-parse';
+import pdf from 'pdf-parse-debugging-disabled';
 import mammoth from 'mammoth';
+import mongoose from 'mongoose';
 import Resume from '../models/Resume.js';
 import JobRole from '../models/JobRole.js';
 import { 
@@ -295,6 +296,20 @@ export async function analyzeResume(req, res) {
 
     console.log(`🔍 Starting analysis for resume: ${resumeId}, job role: ${jobRoleId}`);
 
+    if (!mongoose.Types.ObjectId.isValid(resumeId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid resumeId format. Must be a valid 24-character hexadecimal ObjectId.'
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(jobRoleId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid jobRoleId format. Must be a valid 24-character hexadecimal ObjectId.'
+      });
+    }
+
     const [resume, jobRole] = await Promise.all([
       Resume.findById(resumeId),
       JobRole.findById(jobRoleId)
@@ -393,6 +408,13 @@ export async function analyzeResume(req, res) {
 // Get single resume
 export async function getResume(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid resume ID format.'
+      });
+    }
+
     const resume = await Resume.findById(req.params.id);
     
     if (!resume) {
@@ -444,6 +466,13 @@ export async function getAllResumes(req, res) {
 // Delete resume
 export async function deleteResume(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid resume ID format.'
+      });
+    }
+
     const resume = await Resume.findById(req.params.id);
     
     if (!resume) {

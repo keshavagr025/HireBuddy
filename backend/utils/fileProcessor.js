@@ -1,6 +1,6 @@
 // utils/fileProcessor.js
 import { promises as fs } from 'fs';
-import pdfParse from 'pdf-parse';
+import pdfParse from 'pdf-parse-debugging-disabled';
 import mammoth from 'mammoth';
 
 // Extract text from different file types
